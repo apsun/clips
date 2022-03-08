@@ -77,8 +77,8 @@ class ClipsController:
         after 15 minutes of inactivity.
     </p>
     <p>
-        For programmatic access to a clipboard's contents, prepend /text
-        before the clipboard name. POST will write the contents, and GET
+        For programmatic access to a clipboard's contents, append /text
+        after the clipboard name. POST will write the contents, and GET
         will read it back.
     </p>
     <p>
@@ -140,7 +140,7 @@ class ClipsController:
             let copyclip = document.getElementById("copyclip");
 
             let name = window.location.pathname.substring(1);
-            let texturl = "/text/" + name;
+            let texturl = "/" + name + "/text";
             let resp = await fetch(texturl);
             let text = await resp.text();
 
@@ -215,7 +215,6 @@ class ClipsController:
         return None
 
     def do_text(self, name):
-        name = name.lower()
         if cherrypy.request.method == "GET":
             return self.get_text(name)
         elif cherrypy.request.method == "POST":
@@ -227,12 +226,12 @@ class ClipsController:
     def default(self, *segs):
         if len(segs) == 0:
             return self.do_index()
-        if len(segs) == 1 and segs[0] == "random":
+        if len(segs) == 1 and segs[0].lower() == "random":
             return self.do_random()
         if len(segs) == 1:
             return self.do_clip()
-        if len(segs) == 2 and segs[0] == "text":
-            return self.do_text(segs[1])
+        if len(segs) == 2 and segs[1].lower() == "text":
+            return self.do_text(segs[0].lower())
         raise cherrypy.HTTPError(404)
 
 
