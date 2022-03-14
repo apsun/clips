@@ -48,7 +48,7 @@ wordlist = read_wordlist()
 
 class ClipsController:
     def do_index(self):
-        return """
+        return r"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,7 +89,7 @@ class ClipsController:
 """
 
     def do_clip(self):
-        return """
+        return r"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,15 +159,31 @@ class ClipsController:
             });
 
             openurl.addEventListener("click", function() {
-                let text = editor.value;
-                try {
-                    new URL(text);
-                } catch (_) {
-                    openurl.innerText = "Invalid URL!";
-                    return;
+                let lines = editor.value.split("\n");
+                let failed = 0;
+                let succeeded = 0;
+                for (let line of lines) {
+                    line = line.trim();
+                    if (line === "") {
+                        continue;
+                    }
+
+                    try {
+                        new URL(line);
+                    } catch (_) {
+                        failed++;
+                        continue;
+                    }
+
+                    window.open(line, "_blank", "noopener,noreferrer");
+                    succeeded++;
                 }
-                window.open(text, "_blank", "noopener,noreferrer");
-                openurl.innerText = "Opened!";
+
+                if (failed > 0) {
+                    openurl.innerText = `Invalid URL x${failed}!`;
+                } else if (succeeded > 0) {
+                    openurl.innerText = `Opened URL x${succeeded}!`;
+                }
             });
 
             copyclip.addEventListener("click", function() {
